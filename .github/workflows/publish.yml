@@ -5,10 +5,15 @@ name: 차단 목록 서명
 on:
   push:
     branches: [main]
-    paths: [domains.txt, scripts/build.py]
+    paths: [domains.txt, scripts/**, .github/workflows/**]
   schedule:
     - cron: "17 18 * * *"   # 매일 03:17 (한국 시각)
   workflow_dispatch:
+    inputs:
+      force:
+        description: "목록이 같아도 새 버전으로 다시 서명 (서명 키 점검용)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -25,7 +30,10 @@ jobs:
       - name: 검사하고 서명
         env:
           BLOCKLIST_SIGNING_KEY: ${{ secrets.BLOCKLIST_SIGNING_KEY }}
+          FORCE_SIGN: ${{ inputs.force && '1' || '0' }}
         run: python scripts/build.py
+      - name: 올릴 파일의 서명 확인 (앱과 같은 공개 키)
+        run: python scripts/verify.py
       - name: 바뀌었으면 올리기
         run: |
           git config user.name "github-actions[bot]"

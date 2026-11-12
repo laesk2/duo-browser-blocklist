@@ -53,7 +53,7 @@ def main() -> None:
     digest = hashlib.sha256(json.dumps(rules, sort_keys=True).encode()).hexdigest()
     if OUT.exists():
         previous = json.loads(OUT.read_text(encoding="utf-8"))
-        if previous.get("rulesSHA256") == digest:
+        if previous.get("rulesSHA256") == digest and os.environ.get("FORCE_SIGN") != "1":
             print("목록이 바뀌지 않음: 그대로 둔다")
             return
         version = max(int(time.time()), int(previous.get("version", 0)) + 1)
