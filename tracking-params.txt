@@ -1,0 +1,24 @@
+# 링크 주소에서 지울 추적 값 이름 (한 줄에 하나, 소문자·숫자·_ 만). 앱에 들어 있는 것과 합쳐 쓴다.
+# 사이트 기능에 쓰이지 않는 것만 넣는다. 고치면 GitHub Actions가 검사·서명해 dist/에 올린다.
+fbclid
+gclid
+gclsrc
+dclid
+gbraid
+wbraid
+msclkid
+yclid
+twclid
+ttclid
+li_fat_id
+mc_cid
+mc_eid
+_hsenc
+_hsmi
+mkt_tok
+igshid
+oly_anon_id
+oly_enc_id
+vero_id
+rb_clickid
+s_cid
