@@ -25,6 +25,19 @@ RESOURCE_TYPES = {
     "media": "media", "subdocument": "document", "xmlhttprequest": "fetch", "ping": "ping",
     "websocket": "websocket", "other": "other", "popup": "popup", "object": "other",
 }
+# 브라우저 CSS가 아닌 확장 선택자 (Adblock Plus·uBlock 전용). WebKit은 이해하지 못해 그 숨기기 규칙이 통째로 무시되거나
+# 숨기기 컴파일이 실패한다. 선택자 글자 검사(SELECTOR_RE)는 통과하므로 따로 거른다
+EXTENDED_SELECTOR_RE = re.compile(
+    r":-abp-|:has-text\(|:contains\(|:xpath\(|:matches-css|:matches-attr|:matches-path|:upward\(|:remove\(|"
+    r":style\(|:watch-attr|:min-text-length|:others\(|:if\(|:if-not\(|:nth-ancestor\(|:matches-media"
+)
+
+
+def is_plain_selector(selector: str) -> bool:
+    """WebKit css-display-none에 쓸 수 있는 보통 CSS 선택자인지"""
+    return bool(SELECTOR_RE.match(selector)) and not selector.startswith("^") and not EXTENDED_SELECTOR_RE.search(selector)
+
+
 # 앱과 같은 한도: 한 규칙의 도메인 수
 MAX_DOMAINS = 2000
 # 의미는 바꾸지 않아 무시해도 되는 옵션
@@ -158,7 +171,7 @@ def convert(text: str, *, cookie: bool = False) -> dict[str, list]:
             continue
         if "#@#" in line:
             domains, _, selector = line.partition("#@#")
-            if SELECTOR_RE.match(selector):
+            if is_plain_selector(selector):
                 for d in filter(None, domains.split(",")):
                     d = d.lower().removeprefix("www.")
                     if HOST_RE.match(d):
@@ -166,7 +179,7 @@ def convert(text: str, *, cookie: bool = False) -> dict[str, list]:
             continue
         if "##" in line:
             domains, _, selector = line.partition("##")
-            if not SELECTOR_RE.match(selector) or selector.startswith("+js"):
+            if not is_plain_selector(selector) or selector.startswith("+js"):
                 continue
             if not domains:
                 generic.add(selector)
